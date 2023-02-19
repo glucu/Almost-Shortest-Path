@@ -5,6 +5,7 @@
 #include <vector>
 #include <unordered_map>
 #include <algorithm>
+#include <ostream>
 
 template <typename T>
 class MinHeap;
@@ -32,6 +33,9 @@ public:
         m_heap.resize(N + 1);
     }
 
+    [[nodiscard]] bool empty() const
+    { return m_size == 0; }
+
     void heapify_up(int index);
     void heapify_down(int index);
     void insert(T item, int value);
@@ -42,7 +46,7 @@ public:
     void change_by_key(T item, T new_value);
 
     void print() const {
-        for(int i{1}; i < m_heap.size(); ++i) {
+        for (int i{1}; i <= m_size; ++i) {
             std::cout << m_heap[i].m_item << ' ';
         }
     }
@@ -53,13 +57,14 @@ private:
     int m_size;
 };
 
+// MEMBER FUNCTION DEFINITIONS
 template <typename T>
 void MinHeap<T>::heapify_up(int index) {
     auto parent{ index / 2 };
     while(index > 1 && m_heap[parent].m_item > m_heap[index].m_item) {
         std::swap(m_heap[parent], m_heap[index]);
-        m_position[m_heap[index].m_value] = parent;
-        m_position[m_heap[parent].m_value] = index;
+        m_position[m_heap[parent].m_item] = parent;
+        m_position[m_heap[index].m_item] = index;
         index = parent;
         parent = index / 2;
     }
@@ -75,8 +80,8 @@ void MinHeap<T>::heapify_down(int index) {
         }
         if(m_heap[index].m_item <= m_heap[left_child].m_item) break;
         std::swap(m_heap[index].m_item, m_heap[left_child].m_item);
-        m_position[m_heap[index].m_value] = left_child;
-        m_position[m_heap[left_child].m_value] = index;
+        m_position[m_heap[left_child].m_item] = left_child;
+        m_position[m_heap[index].m_item] = index;
         index = left_child;
     }
 }
@@ -108,7 +113,6 @@ template <typename T>
 T MinHeap<T>::extract_min() {
     auto item{ m_heap[1].m_item };
     delete_by_index(1);
-    --m_size;
     return item;
 }
 
@@ -123,12 +127,11 @@ template <typename T>
 void MinHeap<T>::change_by_key(T item, T new_value) {
     auto index{ m_position[item] };
     m_heap[index].m_item = new_value;
-
     if(index > 1 && m_heap[index].m_item < m_heap[index / 2].m_item) {
-        Heapify_Up(index);
+        heapify_up(index);
     }
     else {
-        Heapify_Down(index);
+        heapify_down(index);
     }
 }
 
